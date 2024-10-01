@@ -1,0 +1,17 @@
+
+job:
+  name: curl -L https://web --output web.html
+
+# Create a artifacts
+job:
+  artifacts:
+    name: "$CI_JOB_NAME"
+    paths:
+      - binaries/
+
+
+pdf:
+  script: xelatex mycv.tex
+  artifacts:
+    paths:
+      - mycv.pdf
