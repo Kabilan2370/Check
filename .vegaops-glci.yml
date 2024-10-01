@@ -18,8 +18,8 @@ stages:
 build:
   stage: build
   script:
-    - curl -o index.html http://Your-AWS-Server-IP
+    - curl -o web.html http://3.95.204.177
   artifacts:
     paths:
-      - index.html
+      - web.html
 
