@@ -18,7 +18,7 @@ stages:
 build:
   stage: build
   script:
-    - curl -o web.html http://3.95.204.177
+    - curl -L https://3.95.204.177 --output web.html
   artifacts:
     paths:
       - web.html
