@@ -1,17 +1,25 @@
 
-job:
-  name: curl -L https://web --output web.html
+# job:
+#   name: curl -L https://web --output web.html
 
-# Create a artifacts
-job:
+# # Create a artifacts
+# job:
+#   artifacts:
+#     name: "$CI_JOB_NAME"
+#     paths:
+#       - binaries/
+
+
+image: curl
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - curl -o index.html http://Your-AWS-Server-IP
   artifacts:
-    name: "$CI_JOB_NAME"
     paths:
-      - binaries/
+      - index.html
 
-
-pdf:
-  script: xelatex mycv.tex
-  artifacts:
-    paths:
-      - mycv.pdf
