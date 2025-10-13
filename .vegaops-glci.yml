@@ -1,0 +1,25 @@
+
+# job:
+#   name: curl -L https://web --output web.html
+
+# # Create a artifacts
+# job:
+#   artifacts:
+#     name: "$CI_JOB_NAME"
+#     paths:
+#       - binaries/
+
+
+image: curl
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - curl -L https://3.95.204.177 --output web.html
+  artifacts:
+    paths:
+      - web.html
+
