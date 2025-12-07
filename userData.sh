@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # update the apt
-sudo apt update
+sudo apt update -y
 # Add the docker GPG keys
 sudo apt install -y ca-certificates curl gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -12,17 +12,18 @@ echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
   https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | \
+
 sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Install docker
-sudo apt update
+sudo apt update -y
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Create a docker user
-sudo usermod -aG docker strapi
+sudo usermod -aG docker ubuntu
 
-systemctl start docker
-systemctl enable docker
+sudo systemctl enable docker
+sudo systemctl start docker
 
-docker pull image name
-docker run -d --name web 
+sudo docker pull httpd:latest
+sudo docker run -d --name web -p 80:80 httpd
