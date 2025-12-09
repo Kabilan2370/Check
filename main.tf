@@ -62,12 +62,6 @@ resource "aws_security_group" "public_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
   
   ingress {
     from_port   = 22
@@ -93,18 +87,18 @@ data "template_file" "userdata" {
 
 resource "aws_instance" "strapi-production" {
   ami                    = "ami-0ecb62995f68bb549"
-  instance_type          = "t3.large"
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.pub_sub.id
   key_name               = "Connection"
   vpc_security_group_ids = [aws_security_group.public_sg.id]
 
   root_block_device {
-    volume_size = 20 
+    volume_size = 25 
     volume_type = "gp3"
     delete_on_termination = true
   }
 
-  user_data = data.template_file.userdata.rendered
+  user_data = data.template_file.userData.rendered
 
   tags = {
     Name = "Strapi-Server"
