@@ -1,7 +1,16 @@
 #!/bin/bash
 
+# Install 4GB swap file
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+# Make swap permanent
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
 # update the apt
 sudo apt update -y
+
 # Add the docker GPG keys
 sudo apt install -y ca-certificates curl gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -25,5 +34,5 @@ sudo usermod -aG docker ubuntu
 sudo systemctl enable docker
 sudo systemctl start docker
 
-sudo docker pull httpd:latest
-sudo docker run -d --name web -p 80:80 httpd
+sudo docker pull kabilan2003/strapicustom:3.2
+sudo docker run -d --name web1 -p 1337:1337 kabilan2003/strapicustom:3.2
