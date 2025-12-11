@@ -1,0 +1,51 @@
+name: CI - Build & Push Strapi Image
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps:set-tag.outputs.image_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set IMAGE_TAG (short SHA)
+        id: set-tag
+        run: |
+          echo "IMAGE_TAG=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT    
+
+      # ---------- AWS ECR example ----------
+      - name: Configure AWS credentials (for ECR)
+        if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY && secrets.AWS_REGION }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR & Build & Push
+        if: ${{ secrets.AWS_ACCESS_KEY_ID && secrets.AWS_SECRET_ACCESS_KEY && secrets.AWS_REGION }}
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REPO_NAME="strapi"
+          aws ecr describe-repositories --repository-names "$REPO_NAME" || aws ecr create-repository --repository-name "$REPO_NAME"
+          LOGIN_CMD=$(aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com)
+          TAG=${{ steps.set-tag.outputs.image_tag }}
+          IMAGE_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${TAG}"
+          docker build -t ${REPO_NAME}:${TAG} .
+          docker tag ${REPO_NAME}:${TAG} ${IMAGE_URI}
+          docker push ${IMAGE_URI}
+          echo "IMAGE_REPO=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Show image info for manual copy
+        run: |
+          echo "==== CI FINISHED ===="
+          echo "Use the following IMAGE_TAG and IMAGE_REPO in the terraform workflow dispatch input (copy/paste):"
+          echo "image_tag: ${{ steps.set-tag.outputs.image_tag }}"
